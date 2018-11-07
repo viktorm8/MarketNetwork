@@ -1,4 +1,4 @@
-class PrivateInvestor{
+class PrivateInvestor extends Member{
 
     String fiscalCode;
 

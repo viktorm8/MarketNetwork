@@ -1,4 +1,4 @@
-class Trader{
+class Trader extends Member{
 
     String firmName;
 

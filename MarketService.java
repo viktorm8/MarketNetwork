@@ -35,7 +35,13 @@ public class MarketService{
 
     boolean connect(Member inMemberA, Member inMemberB){
         //true if succeded, false otherwise
-        LinkedList listaMembriConnessiA = nodiConnessi.get(inMemberA.idMember);
+        LinkedList<Member> listaMembriConnessiA; 
+        if(nodiConnessi.get(inMemberA.getIDMember()) == null){
+            listaMembriConnessiA = new LinkedList<>();
+        }
+        else{
+            listaMembriConnessiA = nodiConnessi.get(inMemberA.getIDMember());
+        }
         Iterator iterA = listaMembriConnessiA.iterator();
         while(iterA.hasNext()){
             if (iterA.next().equals(inMemberB)){
@@ -44,7 +50,13 @@ public class MarketService{
             } 
         }
 
-        LinkedList listaMembriConnessiB = nodiConnessi.get(inMemberA.idMember);
+        LinkedList<Member> listaMembriConnessiB; 
+        if(nodiConnessi.get(inMemberB.getIDMember()) == null){
+            listaMembriConnessiB = new LinkedList<>();
+        }
+        else{
+            listaMembriConnessiB = nodiConnessi.get(inMemberB.getIDMember());
+        }
         Iterator iterB = listaMembriConnessiB.iterator();
         while(iterB.hasNext()){
             if (iterB.next().equals(inMemberA)){
@@ -59,16 +71,18 @@ public class MarketService{
         boolean foundA = false;
         boolean foundB = false;
         while(ite.hasNext()){
-            if(ite.next().equals(inMemberA)){
+            Member m1 = (Member)ite.next();
+            if(m1 == inMemberA){
                 foundA = true;
                 System.out.println("A già presente!");
             }
-            if(iter.next().equals(inMemberB)){
+            if(m1.equals(inMemberB)){
                 foundB = true;
                 System.out.println("B già presente!");
             }
         }
-        boolean instantiateA, instantiateB = false;
+        boolean instantiateA = false;
+        boolean instantiateB = false;
         if((foundA) && (!foundB)){
             //instanzia B
             instantiateB = true;
@@ -79,7 +93,6 @@ public class MarketService{
             //instanzia A
             instantiateA = true;
             inMemberA = new Member();
-
             listaNodi.add(inMemberA);
         }
         else {
@@ -109,25 +122,25 @@ public class MarketService{
             listaArchi.add(a);
             
             //retrival list of connected nodes to node and update
-            Member m;
             LinkedList<Member> listaNodiConnessiAdA= nodiConnessi.get(inMemberA.getIDMember());
             LinkedList<Member> listaNodiConnessiAdB= nodiConnessi.get(inMemberB.getIDMember());
             listaNodiConnessiAdA.add(inMemberB);
             listaNodiConnessiAdB.add(inMemberA);
             nodiConnessi.put(inMemberA.getIDMember(), listaMembriConnessiA);
             nodiConnessi.put(inMemberB.getIDMember(), listaMembriConnessiB);
-            
+            return true;
         }
+        return false;
 
     }
 
     public boolean disconnect(Member inMemberA, Member inMemberB){
         Iterator i = listaArchi.iterator();
-        int arcID;
-        Member nodeA;
-        Member nodeB;
+        int arcID = 0;
+        Member nodeA = new Member();
+        Member nodeB = new Member();
         while(i.hasNext()){
-            Arc temp = i.next();
+            Arc temp = (Arc)i.next();
             nodeA = temp.getNodeA();
             nodeB = temp.getNodeB();
             boolean found = false;
@@ -140,12 +153,16 @@ public class MarketService{
             }
 
         }
+        if (arcID == 0){
+            System.out.println("Non sono connessi!");
+            return false;
+        }
         //rimuovo da listaConnessioni
         listaConnessioni.remove(arcID);
 
         //rimuova da nodiConnessi
         //Da NODO A a NODA B
-        LinkedList<Member> tempA = nodiConnessi.get(nodeA);
+        LinkedList<Member> tempA = nodiConnessi.get(nodeA.getIDMember());
         Iterator ite = tempA.iterator();
         while(ite.hasNext()){
             if(ite.next().equals(inMemberB)){
@@ -161,7 +178,7 @@ public class MarketService{
         }
 
         //Da NODO B a NODA A
-        LinkedList<Member> tempB = nodiConnessi.get(nodeB);
+        LinkedList<Member> tempB = nodiConnessi.get(nodeB.getIDMember());
         Iterator it = tempA.iterator();
         while(it.hasNext()){
             if(it.next().equals(inMemberA)){
@@ -177,7 +194,7 @@ public class MarketService{
         }
 
 
-
+        return true;
 
 
     }
