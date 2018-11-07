@@ -15,6 +15,7 @@ public class MarketService{
     HashMap<Integer,LinkedList<Member>> listaConnessioni = new HashMap<>(); // Map idArco,Lista Nodi collegati all'arco
     HashMap<Integer,LinkedList<Member>> nodiConnessi = new HashMap<>(); //Map idMember,Lista Nodi connessi al nodo con id = idMember
     LinkedList<Member> listaNodi = new LinkedList<>(); //anche non connessi
+    LinkedList<Arc> listaArchi = new LinkedList<>(); 
 
     public MarketService(int id){
         this.idMarket = id;
@@ -103,6 +104,9 @@ public class MarketService{
             temp.add(inMemberA);
             temp.add(inMemberB);
             listaConnessioni.put(arcID,temp);
+            Arc a = new Arc(arcID);
+            a.setNodes(inMemberA, inMemberB);
+            listaArchi.add(a);
             
             //retrival list of connected nodes to node and update
             Member m;
@@ -114,6 +118,67 @@ public class MarketService{
             nodiConnessi.put(inMemberB.getIDMember(), listaMembriConnessiB);
             
         }
+
+    }
+
+    public boolean disconnect(Member inMemberA, Member inMemberB){
+        Iterator i = listaArchi.iterator();
+        int arcID;
+        Member nodeA;
+        Member nodeB;
+        while(i.hasNext()){
+            Arc temp = i.next();
+            nodeA = temp.getNodeA();
+            nodeB = temp.getNodeB();
+            boolean found = false;
+            if(((nodeA.equals(inMemberA)) && (nodeB.equals(inMemberB))) 
+            || ((nodeB.equals(inMemberA)) && (nodeA.equals(inMemberB)))){
+                found = true;
+                arcID = temp.getArcID();
+                i.remove();
+                break;
+            }
+
+        }
+        //rimuovo da listaConnessioni
+        listaConnessioni.remove(arcID);
+
+        //rimuova da nodiConnessi
+        //Da NODO A a NODA B
+        LinkedList<Member> tempA = nodiConnessi.get(nodeA);
+        Iterator ite = tempA.iterator();
+        while(ite.hasNext()){
+            if(ite.next().equals(inMemberB)){
+                ite.remove();
+                break;
+            }
+        }
+        if(tempA.isEmpty()){
+            if( nodeA instanceof Bank){
+                listaNodi.remove(nodeA); //rimuovo inMemberA dalla network
+            }
+            
+        }
+
+        //Da NODO B a NODA A
+        LinkedList<Member> tempB = nodiConnessi.get(nodeB);
+        Iterator it = tempA.iterator();
+        while(it.hasNext()){
+            if(it.next().equals(inMemberA)){
+                it.remove();
+                break;
+            }
+        }
+        if(tempB.isEmpty()){
+            if( nodeB instanceof Bank){
+                listaNodi.remove(nodeB); //rimuovo inMemberB dalla network
+            }
+            
+        }
+
+
+
+
 
     }
 
