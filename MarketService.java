@@ -25,6 +25,7 @@ public class MarketService{
     boolean addBank(Bank inBank){
         if(Bank.numberOfBanks < Bank.maxBanks ){
             listaNodi.add(inBank);
+            System.out.print("Banca aggiunta:" + inBank + "\n");
             return true;
         }
         else{
@@ -40,13 +41,13 @@ public class MarketService{
         }
         else{
             listaMembriConnessiA = nodiConnessi.get(inMemberA.getIDMember());
-        }
-        Iterator iterA = listaMembriConnessiA.iterator();
-        while(iterA.hasNext()){
-            if (iterA.next() == inMemberB){
-                System.out.println("NODI GIA CONNESSI!\n");
-                return false;
-            } 
+            for(Member m : listaMembriConnessiA){
+                System.out.println("gia' connessi a inMemberA:" + m + "\n");
+                if(m == inMemberB){
+                    System.out.println("Nodi gia' connessi!\n");
+                    return false;
+                }
+            }
         }
 
         LinkedList<Member> listaMembriConnessiB; 
@@ -55,18 +56,20 @@ public class MarketService{
         }
         else{
             listaMembriConnessiB = nodiConnessi.get(inMemberB.getIDMember());
+            for(Member m : listaMembriConnessiB){
+                System.out.println("gia' connessi a inMemberB:" + m + "\n");
+                if(m == inMemberA){
+                    System.out.println("Nodi gia' connessi!\n");
+                    return false;
+                }
+            }
         }
-        Iterator iterB = listaMembriConnessiB.iterator();
-        while(iterB.hasNext()){
-            if (iterB.next() == inMemberA){
-                System.out.println("NODI GIA CONNESSI!\n");
-                return false;
-            } 
-        }
+
 
         Random r = new Random();
         int arcID = r.nextInt();
         listaNodi.forEach( nodo -> System.out.println(nodo));
+
         Iterator ite = listaNodi.iterator();
         boolean foundA = false;
         boolean foundB = false;
@@ -84,12 +87,12 @@ public class MarketService{
         boolean addA = false;
         boolean addB = false;
         if((foundA) && (!foundB)){
-            //instanzia B
+
             addB = true;
             listaNodi.add(inMemberB);
         }
         else if((!foundA) && (foundB)){
-            //instanzia A
+
             addA = true;
             listaNodi.add(inMemberA);
         }
@@ -98,7 +101,7 @@ public class MarketService{
         }
         
         if( ((foundA) && (foundB) ) || ((foundA) && (addB)) || ((addA) && (foundB))){
-            System.out.println("Nodi già presenti! Li connetto...");
+            System.out.println("Connetto i nodi..." + inMemberA + "e il nodo:" + inMemberB + "\n");
             try{
                 Thread.sleep(1000);
             }catch(InterruptedException ie){}
@@ -106,8 +109,9 @@ public class MarketService{
             //aggiorno lista connessioni
             LinkedList temp = new LinkedList<>();
             temp.add(inMemberA);
-            temp.add(inMemberB);
+            temp.add(inMemberB); 
             listaConnessioni.put(arcID,temp);
+
             Arc a = new Arc(arcID);
             a.setNodes(inMemberA, inMemberB);
             listaArchi.add(a);
@@ -131,8 +135,8 @@ public class MarketService{
             listaNodiConnessiAdB.add(inMemberA);
             nodiConnessi.remove(inMemberA.getIDMember());
             nodiConnessi.remove(inMemberB.getIDMember());
-            nodiConnessi.put(inMemberA.getIDMember(), listaMembriConnessiA);
-            nodiConnessi.put(inMemberB.getIDMember(), listaMembriConnessiB);
+            nodiConnessi.put(inMemberA.getIDMember(), listaNodiConnessiAdA);
+            nodiConnessi.put(inMemberB.getIDMember(), listaNodiConnessiAdB);
             return true;
         }
         return false;
@@ -217,7 +221,6 @@ public class MarketService{
         
         LinkedList<Member> nodiConnessiABank = nodiConnessi.get(inBank.idMember);
         Iterator ite = nodiConnessiABank.iterator();
-        outMembers = new LinkedList<>();
         while(ite.hasNext()){
             Member MemberToAdd = (Trader)ite.next();
             outMembers.add(MemberToAdd);
@@ -226,8 +229,11 @@ public class MarketService{
                 //They are PrivateInvestors
                 Iterator iter = nodiConnessiATrader.iterator();
                 while(iter.hasNext()){
-                    PrivateInvestor pI = (PrivateInvestor) iter.next();
-                    outMembers.add((Member)pI);
+                    Member pI = (Member) iter.next();
+                    if(pI instanceof Bank){
+                        continue;
+                    }
+                    outMembers.add(pI);
                 }
 
             }
